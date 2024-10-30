@@ -1,0 +1,13 @@
+@import '../../node_modules/primeicons/primeicons.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.settingsMenu {
+    border: none;
+    padding: 0;
+}
+
+.settingsMenu .settingsMenuItem .p-menubar-item-content{
+    background: none;
+}
