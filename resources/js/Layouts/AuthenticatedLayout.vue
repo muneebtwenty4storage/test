@@ -4,35 +4,55 @@ import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import { Link } from '@inertiajs/vue3';
-import { RouterLink } from 'vue-router';
-const props = defineProps({
-    username: String
-});
-console.log('Props: ', props.username);
-const items = ref([
-    {
-        label: props.username,
-        icon: 'pi pi-user',
-        items: [
-            {
-                label: 'Edit Profile',
-                icon: 'pi pi-user-edit',
-                url: route('profile.edit')
-            },
-            {
-                label: 'Logout',
-                icon: 'pi pi-sign-out',
-                url: route('logout'),
-                method: 'post',
-                as: 'button'
-            }
-        ]
-    }
-]);
+import { UserPen, LogOut, ChevronDown } from 'lucide-vue-next';
+import { Avatar, AvatarFallback, AvatarImage } from '@/Components/ui/avatar'
+import { SidebarProvider, SidebarTrigger } from "@/Components/ui/sidebar"
+
+const iconMap = {
+    UserPen,
+    LogOut,
+};
+type IconKeys = keyof typeof iconMap;
+
 const showingNavigationDropdown = ref(false);
+
+import {
+    Menubar,
+    MenubarContent,
+    MenubarItem,
+    MenubarMenu,
+    MenubarSeparator,
+    MenubarTrigger,
+} from '@/Components/ui/menubar'
+
+const components: { title: string; as?: string; icon: IconKeys; size: number; method?: Method; href: string; description: string }[] = [
+    {
+        title: 'Edit Profile',
+        icon: 'UserPen',
+        size: 28,
+        href: route('profile.edit'),
+        description: 'Easily update your profile information to keep your account current and personalized.',
+    },
+    {
+        title: 'Logout',
+        icon: 'LogOut',
+        size: 24,
+        href: route('logout'),
+        description: 'Securely sign out of your account to protect your personal information.',
+        method: 'post',
+        as: 'button',
+    },
+];
+
 </script>
 
 <template>
+    <SidebarProvider>
+      <main>
+        <SidebarTrigger />
+        {children}
+      </main>
+    </SidebarProvider>
     <div>
         <div class="min-h-screen bg-gray-100">
             <nav class="border-b border-gray-100 bg-white">
@@ -55,22 +75,36 @@ const showingNavigationDropdown = ref(false);
                             </div>
                         </div>
                         <div class="hidden sm:ms-6 sm:flex sm:items-center">
-                            <Menubar :model="items">
-                                <template #item="{ item, props, hasSubmenu }">
-                                    <router-link v-if="item.route" v-slot="{ href, navigate }" :to="item.route" custom>
-                                        <a v-ripple :href="href" v-bind="props.action" @click="navigate">
-                                            <span :class="item.icon" />
-                                            <span>{{ item.label }}</span>
-                                        </a>
-                                    </router-link>
-                                    <a v-else v-ripple :href="item.url" :target="item.target" v-bind="props.action">
-                                        <span :class="item.icon" />
-                                        <span>{{ item.label }}</span>
-                                        <span v-if="hasSubmenu" class="pi pi-fw pi-angle-down" />
-                                    </a>
-                                </template>
+                            <Menubar>
+                                <MenubarMenu>
+                                    <MenubarTrigger>
+                                        <Avatar class="h-[20px] w-[20px] mx-2">
+                                            <AvatarImage src="https://github.com/radix-vue.png" alt="@radix-vue" />
+                                            <AvatarFallback>CN</AvatarFallback>
+                                        </Avatar> {{ $page.props.auth.user.name }}&nbsp;
+                                        <ChevronDown :size="16" />
+                                    </MenubarTrigger>
+                                    <MenubarContent>
+                                        <template v-for="component in components" :key="component.title">
+                                            <MenubarItem :inset="true">
+                                                <Link :href="component.href" :method="component.method"
+                                                    :as="component.as"
+                                                    class="flex items-center space-x-3 text-left rounded-md">
+                                                <component :is="iconMap[component.icon]" :size="component.size"
+                                                    class="text-gray-600" />
+                                                <div>
+                                                    <div class="text-sm font-medium leading-none text-gray-900">{{
+                                                        component.title }}</div>
+                                                    <p class="hidden lg:block text-sm leading-snug text-gray-500">{{
+                                                        component.description }}</p>
+                                                </div>
+                                                </Link>
+                                            </MenubarItem>
+                                            <MenubarSeparator v-if="component !== components[components.length - 1]" />
+                                        </template>
+                                    </MenubarContent>
+                                </MenubarMenu>
                             </Menubar>
-                          
                         </div>
 
                         <!-- Hamburger -->
